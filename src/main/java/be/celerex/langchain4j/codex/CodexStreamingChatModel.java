@@ -37,7 +37,7 @@ public final class CodexStreamingChatModel implements StreamingChatModel {
 	private final CodexStreamingLifecycle lifecycle;
 	private final CodexReasoningEffort reasoningEffort;
 	private final CodexReasoningSummary reasoningSummary;
-	
+
 	private CodexStreamingChatModel(Builder builder) {
 		if (builder.session == null && builder.executor != null) {
 			builder.sessionBuilder.executor(builder.executor);
@@ -48,7 +48,7 @@ public final class CodexStreamingChatModel implements StreamingChatModel {
 		lifecycle = builder.lifecycle;
 		reasoningEffort = builder.reasoningEffort;
 		reasoningSummary = builder.reasoningSummary;
-			}
+	}
 
 	public static Builder builder() {
 		return new Builder();
@@ -370,7 +370,7 @@ public final class CodexStreamingChatModel implements StreamingChatModel {
 		private String modelName = "gpt-5-codex";
 		private CodexReasoningEffort reasoningEffort = CodexReasoningEffort.MEDIUM;
 		private CodexReasoningSummary reasoningSummary = CodexReasoningSummary.AUTO;
-				private final CodexSession.Builder sessionBuilder = CodexSession.builder();
+		private final CodexSession.Builder sessionBuilder = CodexSession.builder();
 		private Executor executor;
 		private CodexStreamingLifecycle lifecycle = CodexStreamingLifecycle.NO_OP;
 
@@ -386,14 +386,14 @@ public final class CodexStreamingChatModel implements StreamingChatModel {
 			reasoningEffort = java.util.Objects.requireNonNull(value, "reasoningEffort");
 			return this;
 		}
-		
+
 		public Builder reasoningSummary(CodexReasoningSummary value) {
 			reasoningSummary = java.util.Objects.requireNonNull(value, "reasoningSummary");
 			return this;
 		}
-		
+
 		public Builder session(CodexSession value) {
-					session = value;
+			session = value;
 			return this;
 		}
 

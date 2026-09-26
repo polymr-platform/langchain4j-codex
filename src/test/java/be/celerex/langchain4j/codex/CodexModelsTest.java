@@ -369,7 +369,8 @@ class CodexModelsTest {
 			.endpoint(server.url("responses").toString())
 			.build()
 			.chat(ChatRequest.builder().messages(java.util.List.of(message)).build());
-		JsonNode content = new ObjectMapper().readTree(server.takeRequest().getBody().readUtf8())
+		JsonNode content = new ObjectMapper()
+			.readTree(server.takeRequest().getBody().readUtf8())
 			.at("/input/0/content");
 		assertEquals("before", content.get(0).path("text").asText());
 		assertEquals("https://example.test/image.png", content.get(1).path("image_url").asText());

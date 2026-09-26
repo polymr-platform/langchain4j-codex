@@ -47,7 +47,7 @@ public final class CodexSession {
 	}
 
 	<T> HttpResponse<T> send(String payload, HttpResponse.BodyHandler<T> handler) throws Exception {
-			CodexCredentials before = validCredentials();
+		CodexCredentials before = validCredentials();
 		HttpResponse<T> response = sendOnce(payload, handler, before);
 		if (response.statusCode() != 401) {
 			return response;
@@ -101,9 +101,9 @@ public final class CodexSession {
 		refreshAfterUnauthorized(before);
 		return httpClient.send(getRequest(uri, credentials, etag), handler);
 	}
-	
+
 	private <T> CompletableFuture<HttpResponse<T>> sendOnceAsync(String payload, HttpResponse.BodyHandler<T> handler, CodexCredentials current) {
-			return httpClient.sendAsync(request(payload, current), handler);
+		return httpClient.sendAsync(request(payload, current), handler);
 	}
 
 	private <T> HttpResponse<T> sendOnce(String payload, HttpResponse.BodyHandler<T> handler, CodexCredentials current) throws Exception {
@@ -125,9 +125,9 @@ public final class CodexSession {
 		}
 		return request.build();
 	}
-	
+
 	private HttpRequest request(String payload, CodexCredentials current) {
-			HttpRequest request = HttpRequest.newBuilder(endpoint)
+		HttpRequest request = HttpRequest.newBuilder(endpoint)
 			.timeout(Duration.ofMinutes(5))
 			.header("Authorization", "Bearer " + current.accessToken())
 			.header("chatgpt-account-id", current.accountId())

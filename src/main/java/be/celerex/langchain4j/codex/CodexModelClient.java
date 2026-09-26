@@ -67,7 +67,9 @@ public final class CodexModelClient {
 
 	private URI requestUri() {
 		String separator = endpoint.getQuery() == null ? "?" : "&";
-		return URI.create(endpoint + separator + "client_version=" + URLEncoder.encode(clientVersion, StandardCharsets.UTF_8));
+		return URI.create(
+			endpoint + separator + "client_version=" + URLEncoder.encode(clientVersion, StandardCharsets.UTF_8)
+		);
 	}
 
 	private byte[] readBounded(InputStream input) throws IOException {
@@ -86,9 +88,13 @@ public final class CodexModelClient {
 		String slug = required(model, "slug");
 		List<CodexReasoningEffort> efforts = new ArrayList<>();
 		JsonNode levels = model.path("supported_reasoning_levels");
-		if (!levels.isArray()) levels = model.path("supported_reasoning_efforts");
+		if (!levels.isArray()) {
+			levels = model.path("supported_reasoning_efforts");
+		}
 		for (JsonNode level : levels) {
-			String value = level.isTextual() ? level.asText() : level.path("effort").asText(level.path("reasoning_effort").asText());
+			String value = level.isTextual()
+				? level.asText()
+				: level.path("effort").asText(level.path("reasoning_effort").asText());
 			try {
 				efforts.add(CodexReasoningEffort.fromValue(value));
 			}
@@ -98,20 +104,63 @@ public final class CodexModelClient {
 		}
 		List<String> modalities = new ArrayList<>();
 		for (JsonNode modality : model.path("input_modalities")) modalities.add(modality.asText());
-		return new CodexModel(slug, model.path("display_name").asText(slug), nullable(model, "description"), nullableLong(model, "context_window"), model.path("supported_in_api").asBoolean(false), model.path("visibility").asText("none"), nullableEffort(model.path("default_reasoning_level").asText(null)), efforts, nullableSummary(model.path("default_reasoning_summary").asText(null)), modalities, modalities.contains("image"), model.has("priority") && model.get("priority").canConvertToInt() ? model.get("priority").intValue() : null);
+		return new CodexModel(
+			slug,
+			model.path("display_name").asText(slug),
+			nullable(model, "description"),
+			nullableLong(model, "context_window"),
+			model.path("supported_in_api").asBoolean(false),
+			model.path("visibility").asText("none"),
+			nullableEffort(model.path("default_reasoning_level").asText(null)),
+			efforts,
+			nullableSummary(model.path("default_reasoning_summary").asText(null)),
+			modalities,
+			modalities.contains("image"),
+			model.has("priority")
+					&& model.get("priority").canConvertToInt()
+				? model.get("priority").intValue()
+				: null
+		);
 	}
 
 	private static String required(JsonNode node, String name) {
 		String value = node.path(name).asText();
-		if (value.isBlank()) throw new IllegalArgumentException("Invalid Codex model catalog: model " + name + " is required");
+		if (value.isBlank()) {
+			throw new IllegalArgumentException("Invalid Codex model catalog: model " + name + " is required");
+		}
 		return value;
 	}
 
-	private static String nullable(JsonNode node, String name) { return node.hasNonNull(name) ? node.get(name).asText() : null; }
-	private static Long nullableLong(JsonNode node, String name) { return node.has(name) && node.get(name).canConvertToLong() ? node.get(name).longValue() : null; }
-	private static CodexReasoningEffort nullableEffort(String value) { try { return value == null ? null : CodexReasoningEffort.fromValue(value); } catch (IllegalArgumentException ignored) { return null; } }
-	private static CodexReasoningSummary nullableSummary(String value) { try { return value == null ? null : CodexReasoningSummary.fromValue(value); } catch (IllegalArgumentException ignored) { return null; } }
-	private static String libraryVersion() { Package value = CodexModelClient.class.getPackage(); return value.getImplementationVersion() == null ? "1.0.0" : value.getImplementationVersion(); }
+	private static String nullable(JsonNode node, String name) {
+		return node.hasNonNull(name) ? node.get(name).asText() : null;
+	}
+
+	private static Long nullableLong(JsonNode node, String name) {
+		return node.has(name) && node.get(name).canConvertToLong() ? node.get(name).longValue() : null;
+	}
+
+	private static CodexReasoningEffort nullableEffort(String value) {
+		try {
+			return value == null ? null : CodexReasoningEffort.fromValue(value);
+		}
+		catch (IllegalArgumentException ignored) {
+			return null;
+		}
+	}
+
+	private static CodexReasoningSummary nullableSummary(String value) {
+		try {
+			return value == null ? null : CodexReasoningSummary.fromValue(value);
+		}
+		catch (IllegalArgumentException ignored) {
+			return null;
+		}
+	}
+
+	private static String libraryVersion() {
+		Package value = CodexModelClient.class.getPackage();
+		return value.getImplementationVersion() == null ? "1.0.0" : value.getImplementationVersion();
+	}
 
 	public static final class Builder {
 		private CodexSession session;
@@ -119,14 +168,52 @@ public final class CodexModelClient {
 		private String clientVersion;
 		private int maxBodyBytes = DEFAULT_MAX_BODY_BYTES;
 		private final CodexSession.Builder sessionBuilder = CodexSession.builder();
-		public Builder session(CodexSession value) { session = value; return this; }
-		public Builder credentials(CodexCredentials value) { sessionBuilder.credentials(value); return this; }
-		public Builder authJson(String value) { sessionBuilder.authJson(value); return this; }
-		public Builder httpClient(java.net.http.HttpClient value) { sessionBuilder.httpClient(value); return this; }
-		public Builder credentialPersistence(CredentialPersistence value) { sessionBuilder.credentialPersistence(value); return this; }
-		public Builder endpoint(String value) { endpoint = value; return this; }
-		public Builder clientVersion(String value) { clientVersion = value; return this; }
-		public Builder maxBodyBytes(int value) { if (value < 1) throw new IllegalArgumentException("maxBodyBytes must be positive"); maxBodyBytes = value; return this; }
-		public CodexModelClient build() { return new CodexModelClient(this); }
+
+		public Builder session(CodexSession value) {
+			session = value;
+			return this;
+		}
+
+		public Builder credentials(CodexCredentials value) {
+			sessionBuilder.credentials(value);
+			return this;
+		}
+
+		public Builder authJson(String value) {
+			sessionBuilder.authJson(value);
+			return this;
+		}
+
+		public Builder httpClient(java.net.http.HttpClient value) {
+			sessionBuilder.httpClient(value);
+			return this;
+		}
+
+		public Builder credentialPersistence(CredentialPersistence value) {
+			sessionBuilder.credentialPersistence(value);
+			return this;
+		}
+
+		public Builder endpoint(String value) {
+			endpoint = value;
+			return this;
+		}
+
+		public Builder clientVersion(String value) {
+			clientVersion = value;
+			return this;
+		}
+
+		public Builder maxBodyBytes(int value) {
+			if (value < 1) {
+				throw new IllegalArgumentException("maxBodyBytes must be positive");
+			}
+			maxBodyBytes = value;
+			return this;
+		}
+
+		public CodexModelClient build() {
+			return new CodexModelClient(this);
+		}
 	}
 }

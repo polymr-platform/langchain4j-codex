@@ -18,9 +18,13 @@ final class CodexRequestMapper {
 	static String request(ChatRequest request, boolean stream) {
 		return request(request, stream, CodexReasoningEffort.MEDIUM, CodexReasoningSummary.AUTO);
 	}
-	
-	static String request(ChatRequest request, boolean stream, CodexReasoningEffort reasoningEffort, CodexReasoningSummary reasoningSummary) {
-				rejectUnsupported(request);
+
+	static String request(
+			ChatRequest request,
+			boolean stream,
+			CodexReasoningEffort reasoningEffort,
+			CodexReasoningSummary reasoningSummary) {
+		rejectUnsupported(request);
 		ObjectNode root = CodexCredentials.JSON.createObjectNode();
 		root.put("model", request.modelName() == null ? "gpt-5-codex" : request.modelName());
 		root.put("store", false);
@@ -32,7 +36,9 @@ final class CodexRequestMapper {
 				? "auto"
 				: request.toolChoice().name().toLowerCase(java.util.Locale.ROOT)
 		);
-		root.putObject("reasoning").put("effort", reasoningEffort.value()).put("summary", reasoningSummary.value());
+		root.putObject("reasoning")
+			.put("effort", reasoningEffort.value())
+			.put("summary", reasoningSummary.value());
 		root.putArray("include").add("reasoning.encrypted_content");
 		ArrayNode input = root.putArray("input");
 		StringBuilder instructions = new StringBuilder();
@@ -213,7 +219,9 @@ final class CodexRequestMapper {
 		}
 		return "Codex request failed with HTTP " + statusCode
 			+ (detail == null
-					|| detail.isBlank() ? "" : ": " + detail);
+					|| detail.isBlank()
+				? ""
+				: ": " + detail);
 	}
 
 	static ChatResponse response(String body) {

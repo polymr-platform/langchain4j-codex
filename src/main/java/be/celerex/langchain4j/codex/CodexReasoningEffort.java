@@ -11,7 +11,7 @@ public enum CodexReasoningEffort {
 	MAX("max"),
 	ULTRA("ultra"),
 	PERSISTENT("persistent");
-	
+
 	private final String value;
 
 	CodexReasoningEffort(String value) {
