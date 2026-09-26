@@ -11,11 +11,15 @@ import java.util.Set;
 public final class CodexChatModel implements ChatModel {
 	private final CodexSession session;
 	private final ChatRequestParameters defaultRequestParameters;
-
+	private final CodexReasoningEffort reasoningEffort;
+	private final CodexReasoningSummary reasoningSummary;
+	
 	private CodexChatModel(Builder builder) {
 		session = builder.session == null ? builder.sessionBuilder.build() : builder.session;
 		defaultRequestParameters = ChatRequestParameters.builder().modelName(builder.modelName).build();
-	}
+		reasoningEffort = builder.reasoningEffort;
+		reasoningSummary = builder.reasoningSummary;
+			}
 
 	public static Builder builder() {
 		return new Builder();
@@ -24,7 +28,7 @@ public final class CodexChatModel implements ChatModel {
 	@Override
 	public ChatResponse doChat(ChatRequest request) {
 		try {
-			var response = session.send(CodexRequestMapper.request(request, false));
+			var response = session.send(CodexRequestMapper.request(request, false, reasoningEffort, reasoningSummary));
 			if (response.statusCode() / 100 != 2) {
 				throw new IllegalStateException(CodexRequestMapper.errorMessage(response.statusCode(), response.body()));
 			}
@@ -56,7 +60,9 @@ public final class CodexChatModel implements ChatModel {
 	public static final class Builder {
 		private CodexSession session;
 		private String modelName = "gpt-5-codex";
-		private final CodexSession.Builder sessionBuilder = CodexSession.builder();
+		private CodexReasoningEffort reasoningEffort = CodexReasoningEffort.MEDIUM;
+		private CodexReasoningSummary reasoningSummary = CodexReasoningSummary.AUTO;
+				private final CodexSession.Builder sessionBuilder = CodexSession.builder();
 
 		public Builder modelName(String value) {
 			if (value == null || value.isBlank()) {
@@ -66,8 +72,18 @@ public final class CodexChatModel implements ChatModel {
 			return this;
 		}
 
+		public Builder reasoningEffort(CodexReasoningEffort value) {
+			reasoningEffort = java.util.Objects.requireNonNull(value, "reasoningEffort");
+			return this;
+		}
+		
+		public Builder reasoningSummary(CodexReasoningSummary value) {
+			reasoningSummary = java.util.Objects.requireNonNull(value, "reasoningSummary");
+			return this;
+		}
+		
 		public Builder session(CodexSession value) {
-			session = value;
+					session = value;
 			return this;
 		}
 

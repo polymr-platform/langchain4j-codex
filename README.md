@@ -52,6 +52,30 @@ CodexStreamingChatModel streaming = CodexStreamingChatModel.builder()
 	.build();
 ```
 
+Each model can select its own reasoning settings even when sharing a session:
+
+```java
+CodexChatModel preciseModel = CodexChatModel.builder()
+	.session(session)
+	.modelName("gpt-5.3-codex")
+	.reasoningEffort(CodexReasoningEffort.HIGH)
+	.reasoningSummary(CodexReasoningSummary.CONCISE)
+	.build();
+```
+
+The defaults are `MEDIUM` and `AUTO`. Current named effort values are `NONE`, `MINIMAL`, `LOW`, `MEDIUM`, `HIGH`, `XHIGH`, `MAX`, `ULTRA`, and `PERSISTENT`; summaries are `AUTO`, `CONCISE`, `DETAILED`, and `NONE`. Use model discovery to determine which efforts a selected model supports.
+
+Discover the authenticated account's current catalog with the same session. The client returns raw catalog metadata and `apiVisibleModels()` filters to list-visible API models:
+
+```java
+CodexModelCatalog catalog = CodexModelClient.builder().session(session).build().listModels();
+for (CodexModel model : catalog.apiVisibleModels()) {
+	System.out.println(model.slug());
+}
+```
+
+Catalog requests use the Codex account headers, replay once after a 401 refresh, bound bodies to 2 MiB, and reuse an ETag when the same client instance is used.
+
 `CodexSession.Builder.httpClient(...)` accepts an application-managed Java `HttpClient`. `CodexSession.Builder.executor(...)` controls asynchronous credential and retry work. `CodexStreamingChatModel.Builder.executor(...)` controls SSE parsing and callbacks. Executors and HTTP clients remain owned by the application.
 
 ### Import existing auth.json

@@ -47,7 +47,7 @@ public final class CodexSession {
 	}
 
 	<T> HttpResponse<T> send(String payload, HttpResponse.BodyHandler<T> handler) throws Exception {
-		CodexCredentials before = validCredentials();
+			CodexCredentials before = validCredentials();
 		HttpResponse<T> response = sendOnce(payload, handler, before);
 		if (response.statusCode() != 401) {
 			return response;
@@ -92,16 +92,42 @@ public final class CodexSession {
 			);
 	}
 
+	<T> HttpResponse<T> get(URI uri, HttpResponse.BodyHandler<T> handler, String etag) throws Exception {
+		CodexCredentials before = validCredentials();
+		HttpResponse<T> response = httpClient.send(getRequest(uri, before, etag), handler);
+		if (response.statusCode() != 401) {
+			return response;
+		}
+		refreshAfterUnauthorized(before);
+		return httpClient.send(getRequest(uri, credentials, etag), handler);
+	}
+	
 	private <T> CompletableFuture<HttpResponse<T>> sendOnceAsync(String payload, HttpResponse.BodyHandler<T> handler, CodexCredentials current) {
-		return httpClient.sendAsync(request(payload, current), handler);
+			return httpClient.sendAsync(request(payload, current), handler);
 	}
 
 	private <T> HttpResponse<T> sendOnce(String payload, HttpResponse.BodyHandler<T> handler, CodexCredentials current) throws Exception {
 		return httpClient.send(request(payload, current), handler);
 	}
 
+	private HttpRequest getRequest(URI uri, CodexCredentials current, String etag) {
+		HttpRequest.Builder request = HttpRequest.newBuilder(uri)
+			.timeout(Duration.ofMinutes(1))
+			.header("Authorization", "Bearer " + current.accessToken())
+			.header("chatgpt-account-id", current.accountId())
+			.header("originator", originator)
+			.header("user-agent", userAgent)
+			.header("x-client-request-id", UUID.randomUUID().toString())
+			.header("Accept", "application/json")
+			.GET();
+		if (etag != null && !etag.isBlank()) {
+			request.header("If-None-Match", etag);
+		}
+		return request.build();
+	}
+	
 	private HttpRequest request(String payload, CodexCredentials current) {
-		HttpRequest request = HttpRequest.newBuilder(endpoint)
+			HttpRequest request = HttpRequest.newBuilder(endpoint)
 			.timeout(Duration.ofMinutes(5))
 			.header("Authorization", "Bearer " + current.accessToken())
 			.header("chatgpt-account-id", current.accountId())

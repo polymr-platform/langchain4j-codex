@@ -35,7 +35,9 @@ public final class CodexStreamingChatModel implements StreamingChatModel {
 	private final ChatRequestParameters defaultRequestParameters;
 	private final Executor executor;
 	private final CodexStreamingLifecycle lifecycle;
-
+	private final CodexReasoningEffort reasoningEffort;
+	private final CodexReasoningSummary reasoningSummary;
+	
 	private CodexStreamingChatModel(Builder builder) {
 		if (builder.session == null && builder.executor != null) {
 			builder.sessionBuilder.executor(builder.executor);
@@ -44,7 +46,9 @@ public final class CodexStreamingChatModel implements StreamingChatModel {
 		defaultRequestParameters = ChatRequestParameters.builder().modelName(builder.modelName).build();
 		executor = builder.executor == null ? ForkJoinPool.commonPool() : builder.executor;
 		lifecycle = builder.lifecycle;
-	}
+		reasoningEffort = builder.reasoningEffort;
+		reasoningSummary = builder.reasoningSummary;
+			}
 
 	public static Builder builder() {
 		return new Builder();
@@ -54,7 +58,7 @@ public final class CodexStreamingChatModel implements StreamingChatModel {
 	public void doChat(ChatRequest request, StreamingChatResponseHandler handler) {
 		String payload;
 		try {
-			payload = CodexRequestMapper.request(request, true);
+			payload = CodexRequestMapper.request(request, true, reasoningEffort, reasoningSummary);
 		}
 		catch (Throwable throwable) {
 			handler.onError(throwable);
@@ -364,7 +368,9 @@ public final class CodexStreamingChatModel implements StreamingChatModel {
 	public static final class Builder {
 		private CodexSession session;
 		private String modelName = "gpt-5-codex";
-		private final CodexSession.Builder sessionBuilder = CodexSession.builder();
+		private CodexReasoningEffort reasoningEffort = CodexReasoningEffort.MEDIUM;
+		private CodexReasoningSummary reasoningSummary = CodexReasoningSummary.AUTO;
+				private final CodexSession.Builder sessionBuilder = CodexSession.builder();
 		private Executor executor;
 		private CodexStreamingLifecycle lifecycle = CodexStreamingLifecycle.NO_OP;
 
@@ -376,8 +382,18 @@ public final class CodexStreamingChatModel implements StreamingChatModel {
 			return this;
 		}
 
+		public Builder reasoningEffort(CodexReasoningEffort value) {
+			reasoningEffort = java.util.Objects.requireNonNull(value, "reasoningEffort");
+			return this;
+		}
+		
+		public Builder reasoningSummary(CodexReasoningSummary value) {
+			reasoningSummary = java.util.Objects.requireNonNull(value, "reasoningSummary");
+			return this;
+		}
+		
 		public Builder session(CodexSession value) {
-			session = value;
+					session = value;
 			return this;
 		}
 

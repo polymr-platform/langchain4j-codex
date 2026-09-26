@@ -16,7 +16,11 @@ final class CodexRequestMapper {
 	private static final System.Logger LOG = System.getLogger(CodexRequestMapper.class.getName());
 
 	static String request(ChatRequest request, boolean stream) {
-		rejectUnsupported(request);
+		return request(request, stream, CodexReasoningEffort.MEDIUM, CodexReasoningSummary.AUTO);
+	}
+	
+	static String request(ChatRequest request, boolean stream, CodexReasoningEffort reasoningEffort, CodexReasoningSummary reasoningSummary) {
+				rejectUnsupported(request);
 		ObjectNode root = CodexCredentials.JSON.createObjectNode();
 		root.put("model", request.modelName() == null ? "gpt-5-codex" : request.modelName());
 		root.put("store", false);
@@ -28,7 +32,7 @@ final class CodexRequestMapper {
 				? "auto"
 				: request.toolChoice().name().toLowerCase(java.util.Locale.ROOT)
 		);
-		root.putObject("reasoning").put("effort", "medium").put("summary", "auto");
+		root.putObject("reasoning").put("effort", reasoningEffort.value()).put("summary", reasoningSummary.value());
 		root.putArray("include").add("reasoning.encrypted_content");
 		ArrayNode input = root.putArray("input");
 		StringBuilder instructions = new StringBuilder();
